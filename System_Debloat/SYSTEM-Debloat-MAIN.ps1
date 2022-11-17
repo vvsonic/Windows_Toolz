@@ -540,10 +540,11 @@ Remove-Item "FirstLogon.bat" -Force
 Remove-Item "cleanup.cmd" -Force
 
 Write-Host -ForegroundColor Red "Complete. Please review errors, and it is recommended to restart the computer now"
-	
-Shutdown.exe -r -t 90
-Write-Host
-Write-Host -ForegroundColor Red "System will restart in 90 seconds. To abort, send command: Shutdown.exe -a "
+
+#Commenting out as we are adding to our Freshly script. Uncomment if running a once off basis	
+#Shutdown.exe -r -t 90
+#Write-Host
+#Write-Host -ForegroundColor Red "System will restart in 90 seconds. To abort, send command: Shutdown.exe -a "
 
 Remove-Item -LiteralPath $MyInvocation.MyCommand.Path -Force
 
