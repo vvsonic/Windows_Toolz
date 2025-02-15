@@ -51,5 +51,5 @@
     :: Execute the main PowerShell script
     PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%PowerShellScriptPath%'"
 
-:: Start the script by checking for admin privileges
-goto :CheckAdmin
+:: Explicitly exit after execution to prevent further loops or re-execution
+exit
