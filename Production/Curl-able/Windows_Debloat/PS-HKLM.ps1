@@ -443,4 +443,6 @@ Write-Host -ForegroundColor Green "Launching PS - HKCU Srcipts"
 & C:\Temp\Cleanup\PS-HKCU.ps1
 
 Write-Host
-Read-Host -Prompt "Finished! Press Enter to exit"
+#Read-Host -Prompt "Finished! Press Enter to exit"
+# Explicitly exit after completion to ensure the script terminates
+exit
