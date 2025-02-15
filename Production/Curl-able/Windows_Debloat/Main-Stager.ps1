@@ -19,16 +19,16 @@ Write-Host "  @Exploitacious "
 
 Write-Host
 
-Write-Host "Launching PS Modules & Windows Updates"
-Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp\Cleanup\PSandWindowsUpdates.ps1`"" -Verb RunAs
+#Write-Host "Launching PS Modules & Windows Updates"
+#Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp\Cleanup\PSandWindowsUpdates.ps1`"" -Verb RunAs
 
 # Countdown timer before launching the next script
-$i = 180 #Seconds
-do {
-    Write-Host $i
-    Sleep 1
-    $i--
-} while ($i -gt 0)
+#$i = 180 #Seconds
+#    do {
+    #Write-Host $i
+    #Sleep 1
+    #$i--
+#} while ($i -gt 0)
 
 Write-Host "Launching De-Bloat Processes..."
 Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp\Cleanup\UninstallBloat.ps1`"" -Verb RunAs
