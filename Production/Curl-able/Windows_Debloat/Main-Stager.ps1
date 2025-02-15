@@ -47,7 +47,7 @@ Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp
 # Ensure proper exit when done
 Write-Host "All tasks completed!"
 Write-Host "Press Enter to exit the script."
-Read-Host -Prompt "Finished! Press Enter to exit"
+#Read-Host -Prompt "Finished! Press Enter to exit"
 
 # Explicitly exit after completion to ensure the script terminates
 exit
