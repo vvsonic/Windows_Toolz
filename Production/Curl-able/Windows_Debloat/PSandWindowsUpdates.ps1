@@ -106,4 +106,6 @@ else {
 }
 
 Write-Host
-Read-Host -Prompt "Finished! Press Enter to exit"
+#Read-Host -Prompt "Finished! Press Enter to exit"
+# Explicitly exit after completion to ensure the script terminates
+exit
