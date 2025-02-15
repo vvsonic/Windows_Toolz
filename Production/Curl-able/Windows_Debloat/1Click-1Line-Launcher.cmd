@@ -26,7 +26,7 @@
     echo Downloading Files...
 
     :: Base URL for downloading files
-    set baseURL=https://raw.githubusercontent.com/Exploitacious/Windows_Toolz/main/Production/Curl-able/Windows_Debloat/
+    set baseURL=https://raw.githubusercontent.com/vvsonic/Windows_Toolz/refs/heads/main/Production/Curl-able/Windows_Debloat/
 
     :: Loop through each file and download it using PowerShell
     for %%f in (
