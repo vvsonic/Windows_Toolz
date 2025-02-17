@@ -34,7 +34,7 @@ Write-Host "Launching De-Bloat Processes..."
 Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp\Cleanup\UninstallBloat.ps1`"" -Verb RunAs
 
 # Countdown timer before launching the next script
-$i = 5 #Seconds
+$i = 180 #Seconds
 do {
     Write-Host $i
     Sleep 1
@@ -43,6 +43,14 @@ do {
 
 Write-Host "Launching Windows tweaks and settings..."
 Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp\Cleanup\PS-HKLM.ps1`"" -Verb RunAs
+
+# Countdown timer before launching the next script
+$i = 300 #Seconds
+do {
+    Write-Host $i
+    Sleep 1
+    $i--
+} while ($i -gt 0)
 
 # Ensure proper exit when done
 Write-Host "All tasks completed!"
