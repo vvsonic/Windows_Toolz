@@ -18,8 +18,9 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 # Register PSGallery PSprovider, set it as Trusted source, Verify NuGet
 Register-PSRepository -Default -ErrorAction SilentlyContinue
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -ErrorAction SilentlyContinue
-Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope AllUsers -Force -ErrorAction SilentlyContinue
-Install-Module PowerShellGet -MinimumVersion 2.2.4 -Scope AllUsers -Force -ErrorAction SilentlyContinue
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Scope AllUsers -Force -Confirm:$false -ErrorAction SilentlyContinue
+Install-Module -Name PowerShellGet -MinimumVersion 2.2.4 -Scope AllUsers -Force -Confirm:$false -ErrorAction SilentlyContinue
+
 
 # Update or install necessary modules
 $modules = Get-InstalledModule | Select-Object -ExpandProperty "Name"
