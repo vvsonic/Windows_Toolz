@@ -45,7 +45,7 @@ Write-Host "Launching Windows tweaks and settings..."
 Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp\Cleanup\PS-HKLM.ps1`"" -Verb RunAs
 
 # Countdown timer before launching the next script
-$i = 300 #Seconds
+$i = 180 #Seconds
 do {
     Write-Host $i
     Sleep 1
