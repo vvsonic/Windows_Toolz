@@ -326,5 +326,5 @@ REM Must be run at the end of the script because it will remove previous app sug
 REM Tutorial: https://www.tenforums.com/tutorials/3087-reset-start-layout-windows-10-a.html
 REG DELETE "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\Cache\DefaultAccount" /F 1>NUL
 
-taskkill /f /im explorer.exe
-start explorer.exe
+#taskkill /f /im explorer.exe
+#start explorer.exe
