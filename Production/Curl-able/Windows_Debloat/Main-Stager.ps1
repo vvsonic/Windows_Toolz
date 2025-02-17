@@ -23,7 +23,7 @@ Write-Host "Launching PS Modules & Windows Updates"
 Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp\Cleanup\PSandWindowsUpdates.ps1`"" -Verb RunAs
 
 #Countdown timer before launching the next script
-$i = 180 #Seconds
+$i = 240 #Seconds
     do {
     Write-Host $i
     Sleep 1
