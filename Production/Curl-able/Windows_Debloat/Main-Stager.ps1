@@ -57,5 +57,22 @@ Write-Host "All tasks completed!"
 Write-Host "Press Enter to exit the script."
 #Read-Host -Prompt "Finished! Press Enter to exit"
 
+# Implement User Logon Script
+
+Write-Host "Creating Directories 'C:\Windows\FirstUserLogon' and Copying files"
+mkdir "C:\Windows\FirstUserLogon" -ErrorAction SilentlyContinue
+Copy-Item "PS-HKCU.ps1" "C:\Windows\FirstUserLogon\DebloatScript-HKCU.ps1"
+Copy-Item "Cmd-HKCU.cmd" "C:\Windows\FirstUserLogon\Cmd-HKCU.cmd"
+Copy-Item "FirstLogon.bat" "C:\Windows\FirstUserLogon\FirstLogon.bat"
+
+Write-Host
+
+Write-Host "Enabling Registry Keys to run Logon Script"
+REG LOAD HKEY_Users\DefaultUser "C:\Users\Default\NTUSER.DAT"
+Set-ItemProperty -Path "REGISTRY::HKEY_USERS\DefaultUser\Software\Microsoft\Windows\CurrentVersion\Run" -Name "FirstUserLogon" -Value "C:\Windows\FirstUserLogon\FirstLogon.bat" -Type "String"
+REG UNLOAD HKEY_Users\DefaultUser
+	
+Write-Host "New User Logon Script Successfully Enabled"
+
 # Explicitly exit after completion to ensure the script terminates
 exit
