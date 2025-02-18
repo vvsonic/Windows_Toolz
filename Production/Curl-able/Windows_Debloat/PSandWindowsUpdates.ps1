@@ -10,42 +10,31 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     exit
 }
 
-# Define and use TLS1.2
+# Ensure TLS 1.2 for secure connections
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 
 
-# Register PSGallery PSprovider, set it as Trusted source, Verify NuGet
-if (-not (Get-PSRepository -Name 'PSGallery' -ErrorAction SilentlyContinue)) {
-    Register-PSRepository -Default -ErrorAction Stop
+# Install NuGet provider silently if not present
+if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
+    Write-Host "Installing NuGet provider..."
+    Install-PackageProvider -Name NuGet -Force -Confirm:$false -Scope AllUsers
 }
 
-Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -ErrorAction SilentlyContinue
-
-# Ensure NuGet provider is installed without prompts
-Write-Host "Ensuring NuGet provider is installed..." | Out-File -FilePath $logFile -Append
-$nugetInstalled = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
-
-if (-not $nugetInstalled) {
-    Write-Host "Installing NuGet provider..." | Out-File -FilePath $logFile -Append
-    Install-PackageProvider -Name NuGet -Force -Scope AllUsers -Confirm:$false -ErrorAction Stop
+# Trust PSGallery to avoid prompts
+if ((Get-PSRepository -Name 'PSGallery').InstallationPolicy -ne 'Trusted') {
+    Write-Host "Trusting PSGallery..."
+    Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -ErrorAction Stop
 }
 
-
-# Install PowerShellGet module if missing
-$psGetModule = Get-InstalledModule -Name PowerShellGet -ErrorAction SilentlyContinue
-if (-not $psGetModule) {
-    Write-Host "PowerShellGet module is not installed. Installing..." | Out-File -FilePath $logFile -Append
-    Install-Module -Name PowerShellGet -Force -AllowClobber -Confirm:$false -ErrorAction Stop
+# Ensure PSWindowsUpdate module is installed
+if (-not (Get-Module -Name PSWindowsUpdate -ListAvailable -ErrorAction SilentlyContinue)) {
+    Write-Host "Installing PSWindowsUpdate module..."
+    Install-Module -Name PSWindowsUpdate -Force -Confirm:$false -Scope AllUsers
 }
 
-# Ensure PSWindowsUpdate is installed
-if (-not (Get-InstalledModule -Name PSWindowsUpdate -ErrorAction SilentlyContinue)) {
-    Write-Host "PSWindowsUpdate module is not installed. Installing..." | Out-File -FilePath $logFile -Append
-    try {
-        Install-Module -Name PSWindowsUpdate -Force -AllowClobber -Confirm:$false -ErrorAction Stop
-    } catch {
-        Write-Host -ForegroundColor Red "Failed to install PSWindowsUpdate. Details: $_" | Out-File -FilePath $logFile -Append
-        exit
-    }
+# Import the module (if not already imported)
+if (-not (Get-Module -Name PSWindowsUpdate)) {
+    Write-Host "Importing PSWindowsUpdate module..."
+    Import-Module PSWindowsUpdate -Force -ErrorAction Stop
 }
 
 # Now, Import the module
