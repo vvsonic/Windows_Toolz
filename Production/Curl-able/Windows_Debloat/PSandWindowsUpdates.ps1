@@ -12,14 +12,11 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 # Ensure TLS 1.2 for secure connections
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 
 
-# Check if NuGet is installed; if not, install it
-if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
-    Write-Host "NuGet provider not found. Installing..." 
-    Install-PackageProvider -Name NuGet -Confirm:$false -Force
-    Write-Host "NuGet provider installed."
-}
+# Directly install the NuGet provider without checking if it's installed
+Write-Host "Ensuring NuGet provider is installed..."
+Install-PackageProvider -Name NuGet -Confirm:$false -Force
 
-# Verify if NuGet is installed
+# Verify if NuGet is now installed
 $nugetInstalled = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
 if ($null -eq $nugetInstalled) {
     Write-Host "NuGet provider is still not installed. Exiting script." -ForegroundColor Red
