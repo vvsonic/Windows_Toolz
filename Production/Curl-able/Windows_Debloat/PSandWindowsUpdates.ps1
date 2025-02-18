@@ -20,13 +20,15 @@ if (-not (Get-PSRepository -Name 'PSGallery' -ErrorAction SilentlyContinue)) {
 
 Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -ErrorAction SilentlyContinue
 
-# Ensure NuGet is installed without prompts (install if missing)
+# Ensure NuGet provider is installed without prompts
 Write-Host "Ensuring NuGet provider is installed..." | Out-File -FilePath $logFile -Append
 $nugetInstalled = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
+
 if (-not $nugetInstalled) {
     Write-Host "Installing NuGet provider..." | Out-File -FilePath $logFile -Append
-    Install-PackageProvider -Name NuGet -Force -MinimumVersion 2.8.5.201 -Confirm:$false -ErrorAction Stop
+    Install-PackageProvider -Name NuGet -Force -Scope AllUsers -Confirm:$false -ErrorAction Stop
 }
+
 
 # Install PowerShellGet module if missing
 $psGetModule = Get-InstalledModule -Name PowerShellGet -ErrorAction SilentlyContinue
