@@ -15,8 +15,17 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 
 # Install NuGet provider silently if not present
 if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing NuGet provider..."
-    Install-PackageProvider -Name NuGet -Force -Confirm:$false -Scope AllUsers
+    Write-Host "Manually downloading and installing NuGet provider..."
+    
+    $NugetUrl = "https://onegetcdn.azureedge.net/providers/Microsoft.PackageManagement.NuGetProvider-2.8.5.208.dll"
+    $NugetPath = "$env:ProgramFiles\PackageManagement\ProviderAssemblies\nuget\2.8.5.208\Microsoft.PackageManagement.NuGetProvider.dll"
+
+    if (-not (Test-Path $NugetPath)) {
+        New-Item -ItemType Directory -Path (Split-Path $NugetPath) -Force | Out-Null
+        Invoke-WebRequest -Uri $NugetUrl -OutFile $NugetPath -UseBasicParsing
+    }
+
+    Import-PackageProvider -Name NuGet -Force
 }
 
 # Trust PSGallery to avoid prompts
@@ -36,10 +45,6 @@ if (-not (Get-Module -Name PSWindowsUpdate)) {
     Write-Host "Importing PSWindowsUpdate module..."
     Import-Module PSWindowsUpdate -Force -ErrorAction Stop
 }
-
-# Now, Import the module
-Write-Host "Importing PSWindowsUpdate module..." | Out-File -FilePath $logFile -Append
-Import-Module PSWindowsUpdate -Force
 
 # Update or install necessary modules
 $modules = Get-InstalledModule | Select-Object -ExpandProperty "Name"
