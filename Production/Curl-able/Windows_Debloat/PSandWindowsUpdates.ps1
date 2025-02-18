@@ -13,20 +13,15 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 # Ensure TLS 1.2 for secure connections
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 
 
-# Install NuGet provider silently if not present
+# Ensure NuGet provider is installed and registered
 if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
-    Write-Host "Manually downloading and installing NuGet provider..."
-    
-    $NugetUrl = "https://onegetcdn.azureedge.net/providers/Microsoft.PackageManagement.NuGetProvider-2.8.5.208.dll"
-    $NugetPath = "$env:ProgramFiles\PackageManagement\ProviderAssemblies\nuget\2.8.5.208\Microsoft.PackageManagement.NuGetProvider.dll"
-
-    if (-not (Test-Path $NugetPath)) {
-        New-Item -ItemType Directory -Path (Split-Path $NugetPath) -Force | Out-Null
-        Invoke-WebRequest -Uri $NugetUrl -OutFile $NugetPath -UseBasicParsing
-    }
-
-    Import-PackageProvider -Name NuGet -Force
+    Write-Host "Installing NuGet provider..." | Out-File -FilePath $logFile -Append
+    Install-PackageProvider -Name NuGet -Force -Confirm:$false
 }
+
+# **Explicitly register NuGet to avoid prompts**
+[System.Environment]::SetEnvironmentVariable("PSModulePath", $env:PSModulePath, [System.EnvironmentVariableTarget]::Machine)
+Import-PackageProvider -Name NuGet -Force -ErrorAction Stop
 
 # Trust PSGallery to avoid prompts
 if ((Get-PSRepository -Name 'PSGallery').InstallationPolicy -ne 'Trusted') {
@@ -60,7 +55,7 @@ Foreach ($Module In $Modules) {
     if ($null -eq $currentVersion) {
         Write-Host "$($CurrentModule.Name) - Installing $Module from PowerShellGallery. Version: $($CurrentModule.Version)" | Out-File -FilePath $logFile -Append
         try {
-            Install-Module -Name $module -Force
+            Install-Module -Name $module -Force -Confirm:$false
         } catch {
             Write-Host -ForegroundColor Red "Failed to install $Module. Details: $_" | Out-File -FilePath $logFile -Append
         }
@@ -69,13 +64,14 @@ Foreach ($Module In $Modules) {
     } else {
         Write-Host "$($CurrentModule.Name) - Updating from version $currentVersion to $($CurrentModule.Version)" | Out-File -FilePath $logFile -Append
         try {
-            Update-Module -Name $module -Force
+            Update-Module -Name $module -Force -Confirm:$false
             Write-Host -ForegroundColor Green "$Module Successfully Updated" | Out-File -FilePath $logFile -Append
         } catch {
             Write-Host -ForegroundColor Red "Failed to update $Module. Details: $_" | Out-File -FilePath $logFile -Append
         }
     }
 }
+
 
 # Run Windows Updates
 Write-Host "`nRunning Updates..." | Out-File -FilePath $logFile -Append
