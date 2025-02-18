@@ -3,22 +3,64 @@ $logFile = "C:\Temp\PSWindowsUpdate.log"
 Write-Host "Powershell modules and Windows Updates" | Out-File -FilePath $logFile -Append
 Start-Sleep 3
 
-# Verify/Elevate Admin Session...
-if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) { 
-    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs 
+# Check if running as Administrator, if not, re-launch as Admin
+if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Write-Host "Not running as Administrator. Relaunching as Administrator..." | Out-File -FilePath $logFile -Append
+    Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
 }
 
 # Define and use TLS1.2
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 
 
-# Update or install necessary modules...
+# Register PSGallery PSprovider, set it as Trusted source, Verify NuGet
+if (-not (Get-PSRepository -Name 'PSGallery' -ErrorAction SilentlyContinue)) {
+    Register-PSRepository -Default -ErrorAction Stop
+}
+
+Set-PSRepository -Name 'PSGallery' -InstallationPolicy Trusted -ErrorAction SilentlyContinue
+
+# Ensure NuGet is installed without prompts (install if missing)
+Write-Host "Ensuring NuGet provider is installed..." | Out-File -FilePath $logFile -Append
+$nugetInstalled = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
+if (-not $nugetInstalled) {
+    Write-Host "Installing NuGet provider..." | Out-File -FilePath $logFile -Append
+    Install-PackageProvider -Name NuGet -Force -MinimumVersion 2.8.5.201 -Confirm:$false -ErrorAction Stop
+}
+
+# Install PowerShellGet module if missing
+$psGetModule = Get-InstalledModule -Name PowerShellGet -ErrorAction SilentlyContinue
+if (-not $psGetModule) {
+    Write-Host "PowerShellGet module is not installed. Installing..." | Out-File -FilePath $logFile -Append
+    Install-Module -Name PowerShellGet -Force -AllowClobber -Confirm:$false -ErrorAction Stop
+}
+
+# Ensure PSWindowsUpdate is installed
+if (-not (Get-InstalledModule -Name PSWindowsUpdate -ErrorAction SilentlyContinue)) {
+    Write-Host "PSWindowsUpdate module is not installed. Installing..." | Out-File -FilePath $logFile -Append
+    try {
+        Install-Module -Name PSWindowsUpdate -Force -AllowClobber -Confirm:$false -ErrorAction Stop
+    } catch {
+        Write-Host -ForegroundColor Red "Failed to install PSWindowsUpdate. Details: $_" | Out-File -FilePath $logFile -Append
+        exit
+    }
+}
+
+# Now, Import the module
+Write-Host "Importing PSWindowsUpdate module..." | Out-File -FilePath $logFile -Append
+Import-Module PSWindowsUpdate -Force
+
+# Update or install necessary modules
+$modules = Get-InstalledModule | Select-Object -ExpandProperty "Name"
+$Modules += @("PSWindowsUpdate")
+
 Foreach ($Module In $Modules) {
     $currentVersion = $null
     if ($null -ne (Get-InstalledModule -Name $Module -ErrorAction SilentlyContinue)) {
         $currentVersion = (Get-InstalledModule -Name $module -AllVersions).Version
     }
     $CurrentModule = Find-Module -Name $module
+
     if ($null -eq $currentVersion) {
         Write-Host "$($CurrentModule.Name) - Installing $Module from PowerShellGallery. Version: $($CurrentModule.Version)" | Out-File -FilePath $logFile -Append
         try {
@@ -41,9 +83,8 @@ Foreach ($Module In $Modules) {
 
 # Run Windows Updates
 Write-Host "`nRunning Updates..." | Out-File -FilePath $logFile -Append
-Import-Module PSWindowsUpdate -Force
 
-# Check Microsoft Update Service...
+# Check Microsoft Update Service Registration
 Write-Host "Checking Microsoft Update Service Registration..." | Out-File -FilePath $logFile -Append
 $MicrosoftUpdateServiceId = "7971f918-a847-4430-9279-4a52d1efe18d"
 If ((Get-WUServiceManager -ServiceID $MicrosoftUpdateServiceId).ServiceID -eq $MicrosoftUpdateServiceId) {
