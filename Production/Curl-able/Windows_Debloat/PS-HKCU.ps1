@@ -116,5 +116,5 @@ Set-ItemProperty -Path "HKCU:\Software\Policies\Microsoft\Windows\OOBE" -Name "D
 if ($isWin11) {
 	Write-Host -ForegroundColor Green "Launching CMD - HKCU Srcipts"
 	Start-Sleep 3
-	cmd.exe /c "C:\Temp\Cleanup\Cmd-HKCU.cmd"
+	cmd.exe /c "C:\Windows\FirstUserLogon\Cmd-HKCU.cmd"
 }
