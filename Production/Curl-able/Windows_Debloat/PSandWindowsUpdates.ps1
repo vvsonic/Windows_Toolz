@@ -14,7 +14,7 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 
 # Directly install the NuGet provider without checking if it's installed
 Write-Host "Ensuring NuGet provider is installed..."
-Install-PackageProvider -Name NuGet -Confirm:$false -Force
+Install-PackageProvider -Name NuGet -Confirm:$false -Scope AllUsers -Force
 
 # Verify if NuGet is now installed
 $nugetInstalled = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
