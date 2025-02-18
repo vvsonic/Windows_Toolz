@@ -12,35 +12,19 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 # Ensure TLS 1.2 for secure connections
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 
 
-# Define log file
-$logFile = "C:\temp\module_install_log.txt"
-if (!(Test-Path $logFile)) { New-Item -ItemType File -Path $logFile -Force }
-
-# Function to check and install NuGet
-function Ensure-NuGetProvider {
-    Write-Host "Checking for NuGet provider..." | Out-File -FilePath $logFile -Append
-    $nuget = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
-
-    if ($null -eq $nuget) {
-        Write-Host "NuGet provider not found. Installing..." | Out-File -FilePath $logFile -Append
-        Install-PackageProvider -Name NuGet -Force -Confirm:$false
-
-        # Import NuGet explicitly
-        Import-PackageProvider -Name NuGet -Force -ErrorAction Stop
-    }
-
-    # Verify installation
-    $nuget = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
-    if ($null -eq $nuget) {
-        Write-Host -ForegroundColor Red "NuGet provider installation failed. Exiting..." | Out-File -FilePath $logFile -Append
-        exit
-    } else {
-        Write-Host -ForegroundColor Green "NuGet provider installed and verified." | Out-File -FilePath $logFile -Append
-    }
+# Check if NuGet is installed; if not, install it
+if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
+    Write-Host "NuGet provider not found. Installing..." 
+    Install-PackageProvider -Name NuGet -Confirm:$false -Force
+    Write-Host "NuGet provider installed."
 }
 
-# Ensure NuGet is installed before proceeding
-Ensure-NuGetProvider
+# Verify if NuGet is installed
+$nugetInstalled = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
+if ($null -eq $nugetInstalled) {
+    Write-Host "NuGet provider is still not installed. Exiting script." -ForegroundColor Red
+    exit
+}
 
 # Trust PSGallery to avoid prompts
 if ((Get-PSRepository -Name 'PSGallery').InstallationPolicy -ne 'Trusted') {
@@ -72,21 +56,21 @@ Foreach ($Module In $Modules) {
     $CurrentModule = Find-Module -Name $module
 
     if ($null -eq $currentVersion) {
-        Write-Host "$($CurrentModule.Name) - Installing $Module from PowerShellGallery. Version: $($CurrentModule.Version)" | Out-File -FilePath $logFile -Append
+        Write-Host "$($CurrentModule.Name) - Installing $Module from PowerShellGallery. Version: $($CurrentModule.Version)"
         try {
             Install-Module -Name $module -Force -Confirm:$false
         } catch {
-            Write-Host -ForegroundColor Red "Failed to install $Module. Details: $_" | Out-File -FilePath $logFile -Append
+            Write-Host -ForegroundColor Red "Failed to install $Module. Details: $_"
         }
     } elseif ($CurrentModule.Version -eq $currentVersion) {
-        Write-Host -ForegroundColor Green "$($CurrentModule.Name) is up to date. Version: $currentVersion" | Out-File -FilePath $logFile -Append
+        Write-Host -ForegroundColor Green "$($CurrentModule.Name) is up to date. Version: $currentVersion"
     } else {
-        Write-Host "$($CurrentModule.Name) - Updating from version $currentVersion to $($CurrentModule.Version)" | Out-File -FilePath $logFile -Append
+        Write-Host "$($CurrentModule.Name) - Updating from version $currentVersion to $($CurrentModule.Version)"
         try {
             Update-Module -Name $module -Force -Confirm:$false
-            Write-Host -ForegroundColor Green "$Module Successfully Updated" | Out-File -FilePath $logFile -Append
+            Write-Host -ForegroundColor Green "$Module Successfully Updated"
         } catch {
-            Write-Host -ForegroundColor Red "Failed to update $Module. Details: $_" | Out-File -FilePath $logFile -Append
+            Write-Host -ForegroundColor Red "Failed to update $Module. Details: $_"
         }
     }
 }
