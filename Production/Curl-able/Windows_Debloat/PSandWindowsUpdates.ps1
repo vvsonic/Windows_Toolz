@@ -9,19 +9,38 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     Start-Process powershell.exe -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
 }
-
 # Ensure TLS 1.2 for secure connections
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 
 
-# Ensure NuGet provider is installed and registered
-if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
-    Write-Host "Installing NuGet provider..." | Out-File -FilePath $logFile -Append
-    Install-PackageProvider -Name NuGet -Force -Confirm:$false
+# Define log file
+$logFile = "C:\temp\module_install_log.txt"
+if (!(Test-Path $logFile)) { New-Item -ItemType File -Path $logFile -Force }
+
+# Function to check and install NuGet
+function Ensure-NuGetProvider {
+    Write-Host "Checking for NuGet provider..." | Out-File -FilePath $logFile -Append
+    $nuget = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
+
+    if ($null -eq $nuget) {
+        Write-Host "NuGet provider not found. Installing..." | Out-File -FilePath $logFile -Append
+        Install-PackageProvider -Name NuGet -Force -Confirm:$false
+
+        # Import NuGet explicitly
+        Import-PackageProvider -Name NuGet -Force -ErrorAction Stop
+    }
+
+    # Verify installation
+    $nuget = Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue
+    if ($null -eq $nuget) {
+        Write-Host -ForegroundColor Red "NuGet provider installation failed. Exiting..." | Out-File -FilePath $logFile -Append
+        exit
+    } else {
+        Write-Host -ForegroundColor Green "NuGet provider installed and verified." | Out-File -FilePath $logFile -Append
+    }
 }
 
-# **Explicitly register NuGet to avoid prompts**
-[System.Environment]::SetEnvironmentVariable("PSModulePath", $env:PSModulePath, [System.EnvironmentVariableTarget]::Machine)
-Import-PackageProvider -Name NuGet -Force -ErrorAction Stop
+# Ensure NuGet is installed before proceeding
+Ensure-NuGetProvider
 
 # Trust PSGallery to avoid prompts
 if ((Get-PSRepository -Name 'PSGallery').InstallationPolicy -ne 'Trusted') {
@@ -71,7 +90,6 @@ Foreach ($Module In $Modules) {
         }
     }
 }
-
 
 # Run Windows Updates
 Write-Host "`nRunning Updates..." | Out-File -FilePath $logFile -Append
