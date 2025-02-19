@@ -113,8 +113,8 @@ If (!(Test-Path "HKCU:\Software\Policies\Microsoft\Windows\OOBE")) {
 }
 Set-ItemProperty -Path "HKCU:\Software\Policies\Microsoft\Windows\OOBE" -Name "DisablePrivacyExperience" -Type DWord -Value 1
 
-if ($isWin11) {
-	Write-Host -ForegroundColor Green "Launching CMD - HKCU Srcipts"
-	Start-Sleep 3
-	cmd.exe /c "C:\Windows\FirstUserLogon\Cmd-HKCU.cmd"
-}
+#if ($isWin11) {
+#	Write-Host -ForegroundColor Green "Launching CMD - HKCU Srcipts"
+#	Start-Sleep 3
+#	cmd.exe /c "C:\Windows\FirstUserLogon\Cmd-HKCU.cmd"
+#}

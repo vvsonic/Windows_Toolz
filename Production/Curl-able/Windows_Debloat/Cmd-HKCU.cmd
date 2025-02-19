@@ -325,6 +325,3 @@ REG ADD "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\Inpr
 REM Must be run at the end of the script because it will remove previous app suggestions in Start after you have turned off app suggestions
 REM Tutorial: https://www.tenforums.com/tutorials/3087-reset-start-layout-windows-10-a.html
 REG DELETE "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\Cache\DefaultAccount" /F 1>NUL
-
-#taskkill /f /im explorer.exe
-#start explorer.exe
