@@ -19,6 +19,7 @@ Write-Host "  @Exploitacious "
 
 Write-Host
 
+<#
 Write-Host "Launching PS Modules & Windows Updates"
 Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp\Cleanup\PSandWindowsUpdates.ps1`"" -Verb RunAs
 
@@ -29,6 +30,7 @@ $i = 240 #Seconds
     Sleep 1
     $i--
 } while ($i -gt 0)
+#>
 
 Write-Host "Launching De-Bloat Processes..."
 Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp\Cleanup\UninstallBloat.ps1`"" -Verb RunAs
@@ -45,7 +47,7 @@ Write-Host "Launching Windows tweaks and settings..."
 Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"C:\Temp\Cleanup\PS-HKLM.ps1`"" -Verb RunAs
 
 # Countdown timer before launching the next script
-$i = 90 #Seconds
+$i = 30 #Seconds
 do {
     Write-Host $i
     Sleep 1
@@ -75,7 +77,7 @@ REG UNLOAD HKEY_Users\DefaultUser
 Write-Host "New User Logon Script Successfully Enabled"
 
 # Countdown timer before launching the next script
-$i = 90 #Seconds
+$i = 30 #Seconds
 do {
     Write-Host $i
     Sleep 1
